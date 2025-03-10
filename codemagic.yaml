@@ -7,7 +7,7 @@ workflows:
           - certificate_credentials # <-- (CERTIFICATE_PRIVATE_KEY)
         vars:
           XCODE_PROJECT: "Chicky's Tricky Quest.xcodeproj"
-          XCODE_SCHEME: "Chicky's Tricky Quest"
+          XCODE_SCHEME: "chick"
           BUNDLE_ID: "com.chickytricky.quest"
           APP_STORE_APPLE_ID: 6743024815
         xcode: latest
