@@ -1,24 +1,9 @@
 import SwiftUI
 import WebKit
-import GCDWebServers
 
-struct WebView: UIViewRepresentable {
-    let url: URL
-    
-    func makeUIView(context: Context) -> WKWebView {
-        let config = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: config)
-        webView.isOpaque = false // Включаем прозрачность
-        webView.backgroundColor = UIColor.clear // Прозрачный фон
-        webView.load(URLRequest(url: url))
-        return webView
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
-}
 
 struct ContentView: View {
-    @StateObject private var serverManager = ServerManager()
+   
     
     var body: some View {
         GeometryReader { geometry in
@@ -29,12 +14,8 @@ struct ContentView: View {
                 
                 // Содержимое
                 VStack {
-                    if let url = serverManager.serverURL {
-                        WebView(url: url)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity) // Заполняем экран
-                            .background(Color.clear) // Прозрачный контейнер
-                    } else {
-                        Text("Starting server...")
+                    if let url = URL(string: "https://chickytricky.top/game/") {
+                        BrowserViews1(pageURL: url)
                     }
                 }
                 .overlay(
@@ -49,8 +30,7 @@ struct ContentView: View {
                 )
             }
         }
-        .onAppear(perform: serverManager.startServer)
-        .onDisappear(perform: serverManager.stopServer)
+       
     }
 }
 
@@ -71,39 +51,6 @@ extension Color {
     }
 }
 
-
-class ServerManager: ObservableObject {
-    @Published var serverURL: URL?
-    private let server = GCDWebServer()
-    
-    func startServer() {
-        guard let resourcePath = Bundle.main.resourcePath else { return }
-        
-        server.addGETHandler(
-            forBasePath: "/",
-            directoryPath: resourcePath,
-            indexFilename: "index.html",
-            cacheAge: 3600,
-            allowRangeRequests: true
-        )
-        
-        do {
-            try server.start(options: [
-                GCDWebServerOption_Port: 3005,
-                GCDWebServerOption_BindToLocalhost: true
-            ])
-            serverURL = URL(string: "http://localhost:3005")!
-        } catch {
-            print("Server start error: \(error)")
-        }
-    }
-    
-    func stopServer() {
-        server.stop()
-        serverURL = nil
-        print("Server stopped")
-    }
-}
 
 #Preview {
     ContentView()

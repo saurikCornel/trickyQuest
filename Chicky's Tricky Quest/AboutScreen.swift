@@ -1,6 +1,58 @@
 import SwiftUI
 import WebKit
 
+
+struct BrowserViews1: UIViewRepresentable {
+    let pageURL: URL
+    
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.navigationDelegate = context.coordinator
+        return webView
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        DispatchQueue.main.async {
+            if uiView.url != pageURL {
+                uiView.load(URLRequest(url: pageURL))
+            }
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, WKNavigationDelegate {
+        let parent: BrowserViews1
+        let defaults = UserDefaults.standard
+        let reloadKey = "hasReloadedAtFirstLaunch" // Ключ для UserDefaults
+        
+        init(_ parent: BrowserViews1) {
+            self.parent = parent
+        }
+        
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            print("Ошибка загрузки: \(error.localizedDescription)")
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            print("Страница загружена")
+            // Проверяем, была ли уже перезагрузка при первом запуске
+            let hasReloaded = defaults.bool(forKey: reloadKey)
+            if !hasReloaded {
+                // Устанавливаем флаг в UserDefaults и перезагружаем
+                defaults.set(true, forKey: reloadKey)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    webView.reload()
+                }
+            }
+        }
+    }
+}
+
+
 struct BrowserViews: UIViewRepresentable {
     let pageURL: URL
     

@@ -6,7 +6,6 @@ struct Chicky_s_Tricky_QuestApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-            
         }
     }
 }
